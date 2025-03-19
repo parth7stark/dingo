@@ -135,13 +135,21 @@ class SamplingInput(Input):
 
     @density_recovery_settings.setter
     def density_recovery_settings(self, settings):
+        print("Default density_recovery_settings")
         if self.recover_log_prob:
             self._density_recovery_settings = DENSITY_RECOVERY_SETTINGS[
                 "ProxyRecoveryDefault"
             ]
         else:
             self._density_recovery_settings = dict()
+        print(self._density_recovery_settings)
+        """
+        printed following
+        {'num_samples': 400000, 'threshold_std': 5, 'nde_settings': {'model': {'posterior_model_type': 'normalizing_flow', 'posterior_kwargs': {'num_flow_steps': 5, 'base_transform_kwargs': {'hidden_dim': 256, 'num_transform_blocks': 4, 'activation': 'elu', 'dropout_probability': 0.1, 'batch_norm': True, 'num_bins': 8, 'base_transform_type': 'rq-coupling'}}}, 'training': {'num_workers': 0, 'train_fraction': 0.9, 'batch_size': 4096, 'epochs': 20, 'optimizer': {'type': 'adam', 'lr': 0.002}, 'scheduler': {'type': 'cosine', 'T_max': 20}}}}
 
+        """
+
+        print("User Settings: ", settings)
         if settings is not None:
             if settings.lower() in ["default", "proxyrecoverydefault"]:
                 self._density_recovery_settings.update(
@@ -149,7 +157,12 @@ class SamplingInput(Input):
                 )
             else:
                 self._density_recovery_settings.update(convert_string_to_dict(settings))
+        print("Updated density_recovery_settings", self._density_recovery_settings)
+        """
+        Settings:  {"num_samples": 100_000, "nde_settings": {"model": {"posterior_kwargs": {"input_dim": 14, "context_dim": 129}}}}
+        Updated density_recovery_settings {'num_samples': 100000, 'threshold_std': 5, 'nde_settings': {'model': {'posterior_kwargs': {'input_dim': 14, 'context_dim': 129}}}}
 
+        """
         # If there is only one detector, and no context, we cannot use a coupling transform. In this case, we use an
         # autoregressive transform for the density estimator.
         # FIXME: If there are proxies other than time, the condition needs to be updated.

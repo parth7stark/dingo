@@ -3,6 +3,7 @@ from multiprocessing import Pool
 import numpy as np
 import pandas as pd
 from threadpoolctl import threadpool_limits
+from tqdm import tqdm
 
 
 class Likelihood(object):
@@ -38,8 +39,11 @@ class Likelihood(object):
 
             if num_processes > 1:
                 with Pool(processes=num_processes) as pool:
-                    log_likelihood = pool.map(self.log_likelihood, theta_generator)
+                    # log_likelihood = pool.map(self.log_likelihood, theta_generator)
+                    log_likelihood = list(tqdm(pool.imap(self.log_likelihood, theta_generator), total=len(theta), desc="MultiProcessing"))
+
             else:
-                log_likelihood = list(map(self.log_likelihood, theta_generator))
+                # log_likelihood = list(map(self.log_likelihood, theta_generator))
+                log_likelihood =  list(tqdm(map(self.log_likelihood, theta_generator), total=len(theta), desc="Processing"))
 
         return np.array(log_likelihood)

@@ -2,7 +2,7 @@ from multiprocessing import Pool
 from threadpoolctl import threadpool_limits
 import numpy as np
 import pandas as pd
-
+from tqdm import tqdm
 
 def apply_func_with_multiprocessing(
     func: callable, theta: pd.DataFrame, num_processes: int = 1
@@ -33,8 +33,12 @@ def apply_func_with_multiprocessing(
 
         if num_processes > 1:
             with Pool(processes=num_processes) as pool:
-                result = pool.map(func, theta_generator)
+                # result = pool.map(func, theta_generator)
+                result = list(tqdm(pool.imap(func, theta_generator), total=len(theta), desc="MultiProcessing"))
+
         else:
-            result = list(map(func, theta_generator))
+            # For a single process, you can use tqdm directly with map
+            # result = list(map(func, theta_generator))
+            result =  list(tqdm(map(func, theta_generator), total=len(theta), desc="Processing"))
 
     return np.array(result)
